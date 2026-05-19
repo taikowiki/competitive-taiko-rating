@@ -1,13 +1,13 @@
 # Competitive Taiko Rating
 
-태고(Taiko) 커뮤니티의 대회 및 매치 성적을 기반으로 실력을 산정하는 **C-Rating (Competitive Rating)** 시스템입니다.
+태고의 달인 온라인 대회 성적을 기반으로 실력을 산정하는 **C-Rating (Competitive Rating)** 시스템입니다.
 
 ---
 
 ## 📋 프로젝트 개요
-기존의 성과 기반 레이팅 시스템과 차별화된 **대회 성적 중심의 레이팅 모델**을 지향합니다.
+기존의 성과 기반 레이팅 시스템과 차별화된 **온라인 대회 성적 중심의 레이팅 모델**을 지향합니다.
 
-*   **P-Rating (Performance Rating)**: 기존 플레이 데이터를 기반으로 산정하는 실력 지표.
+*   **[P-Rating (Performance Rating)](https://rating.taiko.wiki)**: 기존 플레이 데이터를 기반으로 산정하는 실력 지표.
 *   **C-Rating (Competitive Rating)**: [동더히로바(Donderhiroba)](https://donderhiroba.jp) 온라인 대회 성적을 바탕으로 산정하는 실력 지표. 대회 성적이 높을수록 더 높은 레이팅이 산출됩니다.
 
 ## 🏆 작동 방식: 온라인 대회
@@ -17,7 +17,7 @@
 *   **과제곡 선정**: 매 주기 초기화되는 3개의 그룹(A, B, C)에서 무작위로 곡을 추출하여 공정성을 유지합니다.
 
 ## 📈 레이팅 산출 로직
-C-Rating은 체계적인 그룹화와 통계적 알고리즘을 통해 계산됩니다.
+C-Rating은 그룹화와 Glicko 알고리즘을 통해 계산됩니다.
 
 ### 1. 플레이어 그룹화 (Grouping)
 레이팅의 변별력을 확보하기 위해 다음 규칙에 따라 플레이어를 그룹화합니다.

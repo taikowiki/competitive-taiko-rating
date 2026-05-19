@@ -1,35 +1,34 @@
 # Competitive Taiko Rating
 
-**Languages:** [한국어](./README.ko.md) | [日本語](./docs/ja/README.md) | [English](./README.md)
+**Languages:** [한국어](./docs/ko/README.md) | [日本語](./docs/ja/README.md) | [English](./README.md)
 
-A **C-Rating (Competitive Rating)** system based on the results of Taiko community tournaments and matches.
+This is the **C-Rating (Competitive Rating)** system, designed to calculate player skill levels based on tournament and match performance within Taiko no Tatsujin.
 
 ---
 
 ## 📋 Project Overview
-We aim for a **tournament-performance-centered rating model** that differentiates itself from conventional performance-based rating systems.
+Unlike traditional performance-based rating systems, this model specifically focuses on **online tournament results**.
 
-*   **P-Rating (Performance Rating)**: Skill indicator calculated based on existing individual play data.
-*   **C-Rating (Competitive Rating)**: Skill indicator calculated based on online tournament results from [Donderhiroba](https://donderhiroba.jp). Higher tournament performance leads to a higher rating.
+*   **[P-Rating (Performance Rating)](https://rating.taiko.wiki)**: A skill metric calculated based on existing, historical play data.
+*   **C-Rating (Competitive Rating)**: A skill metric calculated based on online tournament results from [Donderhiroba](https://donderhiroba.jp). Higher tournament placements yield a higher rating.
 
 ## 🏆 How It Works: Online Tournaments
-We operate online tournaments in short cycles to measure skill fairly.
+To ensure fair and accurate skill assessment, online tournaments are run in short, frequent cycles.
 
-*   **Tournament Execution**: We collect results from multiple online tournaments to aggregate performance data.
-*   **Song Selection**: To maintain fairness, songs are randomly selected from three rotating groups (A, B, and C).
+*   **Tournament Operation**: Multiple online tournaments are held to aggregate and collect performance data comprehensively.
+*   **Song Selection**: Fair play is maintained by randomly selecting songs from three separate groups (A, B, and C) that reset every cycle.
 
 ## 📈 Rating Calculation Logic
-C-Rating is calculated through systematic grouping and statistical algorithms.
+C-Rating is calculated using player grouping and the Glicko rating system.
 
 ### 1. Player Grouping
-To ensure high discrimination in ratings, players are grouped based on the following rules:
-*   **Standard**: Grouped after sorting by P-Rating.
-*   **Balance**: The difference between the highest and lowest rating in a group is managed within a specific threshold.
-*   **Constraints**: Each group must have between 2 and 8 players.
-*   **Edge Cases**: Players who do not fit into a group are merged into the group with the smallest rating difference.
+To maintain distinct rating differentiation, players are grouped according to the following rules:
+*   **Criteria**: Players are sorted and grouped by their pre-existing ratings.
+*   **Balance Maintenance**: The gap between the highest and lowest rating within a single group is kept within a specific threshold.
+*   **Limitations**: Each group is strictly limited to a minimum of 2 players and a maximum of 8 players.
+*   **Exception Handling**: Any player who cannot fit into a standard group is merged into the group with the smallest rating difference. (In this case, the 8-player maximum may be exceeded.)
 
 ### 2. Rating Updates (Glicko Algorithm)
-Ratings are updated based on the grouped data using the **Glicko algorithm**.
-*   **Relative Evaluation**: Updates are made by simulating match results against all other players in the group.
-*   **Win/Loss Determination**: A player is considered to have lost against higher-ranked players and won against lower-ranked players, calculating relative skill accordingly.
-
+Ratings are updated using the **Glicko algorithm** based on the organized group data.
+*   **Relative Evaluation**: Updates are simulated by matching the player against every other opponent within their group.
+*   **Match Outcome Determination**: Relative skill is calculated by treating matches against higher-ranked players as losses, and matches against lower-ranked players as wins.
