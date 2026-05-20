@@ -1,84 +1,193 @@
-import { getLatestCompetition, getCurrentSeason } from "./module/db";
+import { 
+    getLatestCompetition, 
+    getCurrentSeason, 
+    getHirobaCompes, 
+    saveRatings, 
+    saveRatingHistory, 
+    saveHirobaCompetitionHistory,
+    createCompetition,
+    createSeason,
+    saveHirobaCompeIds,
+    queryBuilder
+} from "./module/db";
 import { updateRating } from "./module/updateRating";
+import { getAccounts } from "./module/getAccounts";
+import { openHirobaCompe, CompeSong } from "./module/hirobaCompe";
+import { DonderHiroba } from "hiroba-js";
+import { DateTime } from "luxon";
+import { runQuery } from "@yowza/db-handler";
+
+const DAYS = 1;
 
 async function main() {
+    console.log("Starting main workflow...");
+
     // 1. 가장 최신의 대회 데이터를 가져온다.
     const latestCompetition = await getLatestCompetition();
 
     // 2. 가장 최신의 시즌 데이터를 가져온다.
-    const currentSeason = await getCurrentSeason();
+    let currentSeasonNo = await getCurrentSeason();
 
-    // 3. 만약 어제가 시즌의 마지막 날이었다면 오늘 시즌을 생성한다.
-    // 시즌은 이번달 말일까지다.
-    // 즉 시즌은 매달 초마다 새로 시작된다.
+    const now = DateTime.now().setZone('Asia/Seoul');
 
-    // 4. 만약 대회의 체크 날짜가 오늘이면 아래 내용을 수행한다.
-
-    // 5. 대회와 연관된 모든 히로바 대회의 랭킹을 가져온다.
-    // 6. 랭킹을 모두 합쳐 저장한다. 북 번호(taiko number)와 점수 총합을 기록해야한다.
-    // 7. 이전 레이팅을 기준으로 정렬한 뒤 적절히 그룹으로 나눈다.
-    // 8. 각 그룹에서 glicko2-lite를 통해 레이팅을 재산출 한뒤 저장한다.
-    // 9. 새로운 대회를 생성한다. 대회 종료일은 오늘 + 1, 대회 체크 날짜는 오늘 + 2이다.
-};
-
-//await main();
-
-async function test() {
-    /**
- * 지정한 개수만큼 레이팅과 데이터 순서가 완벽히 뒤섞인 Mock 데이터를 생성합니다.
- * @param {number} count 생성할 데이터 개수 (예: 100)
- */
-    function generateRandomMockData(count: number) {
-        const ratings = [];
-        const rankings = [];
-
-        // 1. 순차적으로 매칭 데이터 생성
-        for (let i = 1; i <= count; i++) {
-            const taikoNo = (100000000000 + i).toString();
-
-            // 실력대가 골고루 분포하되 완전히 랜덤한 점수 부여 (1000 ~ 2200)
-            const randomRating = Math.floor(Math.random() * 1200) + 1000;
-            const randomScore = Math.floor(randomRating * 5 + Math.random() * 2000);
-
-            ratings.push({
-                taikoNo,
-                rating: randomRating,
-                RD: Math.floor(Math.random() * 50) + 50, // 50~100 사이 실뢰도
-                Vol: 0.06,
-                ranking: 0
-            });
-
-            rankings.push({
-                entryTaikoNo: taikoNo,
-                totalScore: randomScore
-                // 라이브러리 규격 유지를 위해 필요한 기본값만 세팅
-            });
+    // 3. 만약 대회의 시즌이 이번 달보다 이전이면 새로운 시즌을 생성한다.
+    // 시즌 번호는 1씩 증가한다.
+    if (latestCompetition) {
+        const latestCompDate = DateTime.fromFormat(latestCompetition.startDate, 'yyyy-MM-dd', { zone: 'Asia/Seoul' });
+        
+        if (now.month !== latestCompDate.month || now.year !== latestCompDate.year) {
+            console.log(`New month detected. Creating new season...`);
+            const nextSeasonNo = currentSeasonNo + 1;
+            const startDate = now.startOf('month').toFormat('yyyy-MM-dd');
+            const endDate = now.endOf('month').toFormat('yyyy-MM-dd');
+            await createSeason(nextSeasonNo, startDate, endDate);
+            currentSeasonNo = nextSeasonNo;
+            
+            // 새 시즌이 시작되면 세션 1부터 다시 시작
+            await startNewCompetition(currentSeasonNo, 1);
+            return;
         }
-
-        // 2. 완벽한 랜덤 셔플 (Fisher-Yates Shuffle 알고리즘)
-        // 두 배열의 주소 매칭(taikoNo)은 유지하되, 배열 내부의 인덱스 순서를 완전히 뒤섞습니다.
-        for (let i = count - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [ratings[i], ratings[j]] = [ratings[j], ratings[i]];
-
-            const k = Math.floor(Math.random() * (i + 1));
-            [rankings[i], rankings[k]] = [rankings[k], rankings[i]];
-        }
-
-        return { ratings, rankings };
+    } else {
+        console.log("No competition found. Initializing first season and competition...");
+        const startDate = now.startOf('month').toFormat('yyyy-MM-dd');
+        const endDate = now.endOf('month').toFormat('yyyy-MM-dd');
+        await createSeason(1, startDate, endDate);
+        await startNewCompetition(1, 1);
+        return;
     }
 
-    const mockData = generateRandomMockData(100000);
-    mockData.rankings.sort((a, b) => b.totalScore - a.totalScore);
-    mockData.ratings.sort((a, b) => b.rating - a.rating);
-    await Bun.write('./input.json', JSON.stringify(mockData, null, 2))
-    console.time('update')
-    const output = updateRating(mockData.rankings, mockData.ratings);
-    console.timeEnd('update')
+    // 4. 만약 대회의 체크 날짜가 오늘이면 아래 내용을 수행한다.
+    const checkDate = DateTime.fromFormat(latestCompetition.checkDate, 'yyyy-MM-dd', { zone: 'Asia/Seoul' });
 
-    await Bun.write('./output.json', JSON.stringify(output, null, 2))
+    if (now >= checkDate) {
+        console.log(`Checking results for Season ${latestCompetition.season} Session ${latestCompetition.session}`);
+
+        // 5. 대회와 연관된 모든 히로바 대회의 랭킹을 가져온다.
+        const hirobaCompes = await getHirobaCompes(latestCompetition.season, latestCompetition.session);
+        const accounts = await getAccounts();
+
+        const aggregatedScores = new Map<string, number>();
+
+        // Use one account to fetch all rankings
+        const token = await DonderHiroba.func.getSessionToken({
+            email: accounts[0].email,
+            password: accounts[0].password
+        });
+        await DonderHiroba.func.cardLogin({ token, taikoNumber: accounts[0].taikoNo });
+
+        for (const hc of hirobaCompes) {
+            console.log(`Fetching ranking for Hiroba Competition: ${hc.compeId}`);
+            try {
+                const compeData = await DonderHiroba.func.getCompeData({ token, compeId: hc.compeId });
+                if (compeData && compeData.ranking) {
+                    compeData.ranking.forEach(player => {
+                        const score = player.totalScore;
+                        const taikoNo = player.entryTaikoNo;
+                        aggregatedScores.set(taikoNo, (aggregatedScores.get(taikoNo) ?? 0) + score);
+                    });
+                }
+            } catch (err) {
+                console.error(`Error fetching ranking for ${hc.compeId}:`, err);
+            }
+        }
+
+        // 6. 랭킹을 모두 합쳐 저장한다.
+        const rankings = Array.from(aggregatedScores.entries()).map(([taikoNo, score]) => ({
+            entryTaikoNo: taikoNo,
+            totalScore: score
+        }));
+
+        if (rankings.length > 0) {
+            await saveHirobaCompetitionHistory(rankings, latestCompetition.season, latestCompetition.session);
+
+            // 7. 이전 레이팅을 기준으로 정절히 그룹으로 나눈다.
+            // 8. 각 그룹에서 glicko2-lite를 통해 레이팅을 재산출 한뒤 저장한다.
+            // 레이팅을 가져올 때 IN을 쓰지 않고 전체를 가져온다.
+            const currentRatings = await runQuery(async (run) => {
+                return await queryBuilder
+                    .select('rating', '*')
+                    .execute(run);
+            });
+
+            console.log("Updating ratings...");
+            const updatedRatings = updateRating(rankings, (currentRatings as any[]).map(e => ({
+                taikoNo: e.taikoNo,
+                rating: e.rating,
+                RD: e.RD,
+                Vol: e.Vol,
+                ranking: e.ranking
+            })));
+
+            await saveRatings(updatedRatings);
+            await saveRatingHistory(updatedRatings, latestCompetition.season, latestCompetition.session);
+        } else {
+            console.log("No participants found in this session.");
+        }
+
+        // 9. 새로운 대회를 생성한다.
+        await startNewCompetition(latestCompetition.season, latestCompetition.session + 1);
+    } else {
+        console.log(`Not yet time to check. Next check date: ${latestCompetition.checkDate}`);
+    }
 }
 
-await test();
+async function startNewCompetition(season: number, session: number) {
+    const now = DateTime.now().setZone('Asia/Seoul');
+    const endDate = now.plus({ days: DAYS });
+    const checkDate = now.plus({ days: DAYS + 1 });
+
+    if (checkDate.month !== now.month || checkDate.year !== now.year) {
+        console.log("Next check date is in the next month. Skipping competition creation for this season.");
+        return;
+    }
+
+    console.log(`Starting New Competition: Season ${season}, Session ${session}`);
+
+    // Placeholder for song selection
+    // In a real scenario, these should be randomly selected from a song list.
+    const songs: [CompeSong, CompeSong, CompeSong] = [
+        { songNo: "845", difficulty: 5 },
+        { songNo: "128", difficulty: 4 },
+        { songNo: "181", difficulty: 4 }
+    ];
+
+    const accounts = await getAccounts();
+    const compeIds: string[] = [];
+
+    for (const account of accounts) {
+        console.log(`Opening Hiroba Competition for account: ${account.taikoNo}`);
+        try {
+            const compeId = await openHirobaCompe(account, `C-Rating S${season} #${session}`, songs, DAYS);
+            if (compeId) {
+                compeIds.push(compeId);
+            }
+        } catch (err) {
+            console.error(`Error opening competition for ${account.taikoNo}:`, err);
+        }
+    }
+
+    if (compeIds.length > 0) {
+        await saveHirobaCompeIds(compeIds, season, session);
+
+        await createCompetition({
+            season,
+            session,
+            songNo1: songs[0].songNo,
+            songNo2: songs[1].songNo,
+            songNo3: songs[2].songNo,
+            diff1: songs[0].difficulty.toString(),
+            diff2: songs[1].difficulty.toString(),
+            diff3: songs[2].difficulty.toString(),
+            startDate: now.toFormat('yyyy-MM-dd'),
+            endDate: endDate.toFormat('yyyy-MM-dd'),
+            checkDate: checkDate.toFormat('yyyy-MM-dd')
+        });
+        console.log("New competition created successfully.");
+    } else {
+        console.error("Failed to open any Hiroba competitions.");
+    }
+}
+
+await main();
 
 export { };
