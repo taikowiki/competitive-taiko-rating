@@ -1,4 +1,5 @@
 import { QueryBuilder, runQuery } from "@yowza/db-handler";
+import { InferDBSchema } from "@yowza/db-handler/types";
 
 export const queryBuilder = new QueryBuilder({
     competition: {
@@ -37,7 +38,7 @@ export const queryBuilder = new QueryBuilder({
     },
     season_rating: {
         taikoNo: ['string'],
-        season: ['string'],
+        season: ['number'],
         rating: ['number'],
         ranking: ['number'],
     },
@@ -53,6 +54,27 @@ export const queryBuilder = new QueryBuilder({
         score: ['number']
     }
 });
+export type DBSchema = InferDBSchema<typeof queryBuilder.dbSchema>;
+
+export function archiveSeasonRating(season: number) {
+    return runQuery(async (run) => {
+        const ratings = await queryBuilder
+            .select('rating', '*')
+            .execute(run);
+
+        for (const r of ratings as any[]) {
+            await queryBuilder
+                .insert('season_rating')
+                .set(() => ({
+                    taikoNo: r.taikoNo,
+                    season: season,
+                    rating: r.rating,
+                    ranking: r.ranking
+                }))
+                .execute(run);
+        }
+    })
+}
 
 export function getCurrentSeason() {
     return runQuery(async (run) => {
@@ -64,7 +86,7 @@ export function getCurrentSeason() {
             .limit(1)
             .execute(run);
 
-        return (rows[0] as any)?.season ?? 1;
+        return rows[0]?.season ?? 1;
     })
 }
 
@@ -129,7 +151,6 @@ export function saveRatingHistory(ratings: any[], season: number, session: numbe
                     RD: r.RD,
                     Vol: r.Vol
                 }))
-                .onDuplicate('replace')
                 .execute(run);
         }
     })
