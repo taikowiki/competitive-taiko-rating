@@ -11,4 +11,5 @@ export interface WorkflowState {
     rankings: any[] | null;
     ratingsUpdated?: boolean;
     accounts: Account[];
+    days: number;
 }

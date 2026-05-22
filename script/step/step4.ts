@@ -20,7 +20,7 @@ export async function step4(state: WorkflowState) {
     });
 
     console.log("Updating ratings via glicko2-lite...");
-    const updatedRatings = updateRating(rankings, currentRatings, state.accounts).map(e => ({
+    const updatedRatings = updateRating(rankings, currentRatings, state.accounts, state.days).map(e => ({
         taikoNo: e.taikoNo,
         rating: e.rating,
         RD: e.RD,

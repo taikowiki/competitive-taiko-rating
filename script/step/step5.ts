@@ -4,8 +4,6 @@ import { saveHirobaCompeIds, createCompetition } from "../module/db";
 import { DateTime } from "luxon";
 import { WorkflowState } from "./types";
 
-const DAYS = 1;
-
 export async function step5(state: WorkflowState) {
     console.log("Step 5: Starting New Competition...");
 
@@ -19,8 +17,8 @@ export async function step5(state: WorkflowState) {
     const session = state.session;
 
     const now = DateTime.now().setZone('Asia/Seoul');
-    const endDate = now.plus({ days: DAYS });
-    const checkDate = now.plus({ days: DAYS + 1 });
+    const endDate = now.plus({ days: state.days });
+    const checkDate = now.plus({ days: state.days + 1 });
 
     const prevCompeCheckDate = DateTime.fromFormat(latestCompetition.checkDate, 'yyyy-MM-dd', { zone: 'Asia/Seoul' });
     if (now < prevCompeCheckDate) {
@@ -46,7 +44,7 @@ export async function step5(state: WorkflowState) {
     for (const account of accounts) {
         console.log(`Opening Hiroba Competition for account: ${account.taikoNo}`);
         try {
-            const compeId = await openHirobaCompe(account, `C-Rating S${season} #${session}`, songs, DAYS);
+            const compeId = await openHirobaCompe(account, `C-Rating S${season} #${session}`, songs, state.days);
             if (compeId) {
                 compeIds.push(compeId);
             }

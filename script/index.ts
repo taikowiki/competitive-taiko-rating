@@ -10,12 +10,12 @@ async function main() {
     console.log("Starting main workflow via modular steps...");
 
     const state: WorkflowState = {
-        currentSeasonNo: 1,
+        season: 1,
+        session: 1,
         now: null as any,
-        seasonHandled: false,
         rankings: null,
-        sessionNo: 0,
-        accounts: await getAccounts()
+        accounts: await getAccounts(),
+        days: 5
     };
 
     await step1(state);
