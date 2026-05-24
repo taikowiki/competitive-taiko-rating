@@ -19,7 +19,7 @@ export function updateRating(rankings: { entryTaikoNo: string, totalScore: numbe
     const groupedRankings: { entryTaikoNo: string, totalScore: number }[][] = groupRanking(rankings);
     const updatedRatingMap = update(groupedRankings, map);
 
-    scopeAndUpdateRD(ratings, updatedRatingMap, rankings.length, days)
+    scopeAndUpdateRD(ratings, updatedRatingMap, rankings.length)
 
     const updatedRating = sortNewRating(updatedRatingMap);
 
@@ -75,7 +75,7 @@ function update(groupedRankings: { entryTaikoNo: string, totalScore: number }[][
     return updatedRatingMap;
 }
 
-function scopeAndUpdateRD(ratings: RatingData[], updatedRatingMap: Map<string, RatingData>, participantCount: number, days: number) {
+function scopeAndUpdateRD(ratings: RatingData[], updatedRatingMap: Map<string, RatingData>, participantCount: number) {
     ratings.forEach((r) => {
         const newRating = updatedRatingMap.get(r.taikoNo);
         if (newRating) {
@@ -90,7 +90,7 @@ function scopeAndUpdateRD(ratings: RatingData[], updatedRatingMap: Map<string, R
         }
         else {
             // RD 감소 및 레이팅 감소
-            const RD = Math.min(Math.sqrt(r.RD ** 2 + days * (r.Vol ** 2)), 350);
+            const RD = Math.min(Math.sqrt(r.RD ** 2 + 1 * (r.Vol ** 2)), 350);
             updatedRatingMap.set(r.taikoNo, {
                 taikoNo: r.taikoNo,
                 rating: r.ranking - 10,
