@@ -27,8 +27,8 @@ export function updateRating(rankings: { entryTaikoNo: string, totalScore: numbe
                 matches.push([
                     opponentRating.rating,
                     opponentRating.RD,
-                    group[i].totalScore > group[j].totalScore ? 1 :
-                        group[i].totalScore === group[j].totalScore ? 0.5 :
+                    group[i].totalScore > group[j].totalScore ? (1) :
+                        group[i].totalScore === group[j].totalScore ? (0.5) :
                             0
                 ]);
             }
