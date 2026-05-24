@@ -36,7 +36,7 @@ export async function openHirobaCompe(account: Account, name: string, songs: [Co
     body.set('member_count', '15');
     body.set('member_area', '0');
     body.set('title', '0');
-    body.set('compe_days', days.toString());
+    body.set('compe_days', (days - 1).toString());
     body.set('comment', '');
     body.set('_tckt', ticket ?? '');
 

@@ -5,3 +5,8 @@ export type RatingData = {
     Vol: number;
     ranking: number;
 }
+
+export type Setting = {
+    seasonDurationMonth: number;
+    sessionDurationDays: number;
+}

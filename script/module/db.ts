@@ -1,5 +1,6 @@
 import { QueryBuilder, runQuery } from "@yowza/db-handler";
 import { InferDBSchema } from "@yowza/db-handler/types";
+import { run } from "node:test";
 
 export const queryBuilder = new QueryBuilder({
     competition: {

@@ -1,64 +1,62 @@
-import { getHirobaCompes, saveHirobaCompetitionHistory } from "../module/db";
-import { getAccounts } from "../module/getAccounts";
-import { DonderHiroba } from "hiroba-js";
-import { DateTime } from "luxon";
-import { WorkflowState } from "./types";
+import { RankingData } from "hiroba-js";
+import { Account } from "../module/getAccounts";
+import { DBSchema, queryBuilder } from "../module/db";
+import { defineDBHandler } from "@yowza/db-handler";
+import { updateRating } from "../module/updateRating";
+import { RatingData, Setting } from "../module/types";
 
-export async function step3(state: WorkflowState) {
-    console.log("Step 3: Checking results and fetching rankings...");
-
-    const { latestCompetition, now } = state;
-    if (!latestCompetition){
-        console.log('Cannot find latest competition.');
-        return;
-    };
-
-    const checkDate = DateTime.fromFormat(latestCompetition.checkDate, 'yyyy-MM-dd', { zone: 'Asia/Seoul' });
-
-    if (now < checkDate) {
-        console.log(`Not yet time to check. Next check date: ${latestCompetition.checkDate}`);
-        return;
+const getRatings = defineDBHandler(() => {
+    return async (run) => {
+        return await queryBuilder
+            .select('rating', '*')
+            .execute(run);
     }
-
-    console.log(`Checking results for Season ${latestCompetition.season} Session ${latestCompetition.session}`);
-
-    const hirobaCompes = await getHirobaCompes(latestCompetition.season, latestCompetition.session);
-    const accounts = await getAccounts();
-
-    const aggregatedScores = new Map<string, number>();
-
-    const token = await DonderHiroba.func.getSessionToken({
-        email: accounts[0].email,
-        password: accounts[0].password
-    });
-    await DonderHiroba.func.cardLogin({ token, taikoNumber: accounts[0].taikoNo });
-
-    for (const hc of hirobaCompes) {
-        console.log(`Fetching ranking for Hiroba Competition: ${hc.compeId}`);
-        try {
-            const compeData = await DonderHiroba.func.getCompeData({ token, compeId: hc.compeId });
-            if (compeData && compeData.ranking) {
-                compeData.ranking.forEach(player => {
-                    const score = player.totalScore;
-                    const taikoNo = player.entryTaikoNo;
-                    aggregatedScores.set(taikoNo, (aggregatedScores.get(taikoNo) ?? 0) + score);
-                });
-            }
-        } catch (err) {
-            console.error(`Error fetching ranking for ${hc.compeId}:`, err);
+});
+const updateRatingDB = defineDBHandler<[newRatings: RatingData[]]>((newRatings) => {
+    return async (run) => {
+        for (const r of newRatings) {
+            await queryBuilder
+                .insert('rating')
+                .set(() => ({
+                    ...r
+                }))
+                .onDuplicate('update', () => ({
+                    ...r
+                }))
+                .execute(run);
         }
     }
-
-    const rankings = Array.from(aggregatedScores.entries()).map(([taikoNo, score]) => ({
-        entryTaikoNo: taikoNo,
-        totalScore: score
-    }));
-
-    if (rankings.length > 0) {
-        await saveHirobaCompetitionHistory(rankings, latestCompetition.season, latestCompetition.session);
-        state.rankings = rankings;
-        state.session = latestCompetition.session + 1;
-    } else {
-        console.log("No participants found in this session.");
+});
+const archiveHirobaCompetition = defineDBHandler<[season: number, session: number, rankings: RankingData[]]>((season, session, rankings) => {
+    return async (run) => {
+        for (const r of rankings) {
+            await queryBuilder
+                .insert('hiroba_competition_history')
+                .set(() => ({
+                    season,
+                    session,
+                    taikoNo: r.entryTaikoNo,
+                    score: r.totalScore
+                }))
+                .execute(run)
+        }
     }
+})
+
+export async function step3(accounts: Account[], setting: Setting, rankings: RankingData[] | null, currentCompetition: DBSchema['competition'] | null, needToCheck: boolean) {
+    console.log("Step 3: Updating ratings and archiving rankings...");
+    if (!rankings || !currentCompetition || !needToCheck) {
+        console.log("Rankings or competition data missing, or check not required. Skipping rating update.");
+        return;
+    }
+    const ratings = await getRatings();
+    console.log(`Calculating updated ratings for ${rankings.length} ranking entries...`);
+    const newRatings = updateRating(rankings, ratings, accounts, setting.sessionDurationDays);
+
+    console.log(`Saving ${newRatings.length} updated ratings to database...`);
+    await updateRatingDB(newRatings);
+
+    console.log(`Archiving Hiroba competition history for Season ${currentCompetition.season} Session ${currentCompetition.session}...`);
+    await archiveHirobaCompetition(currentCompetition.season, currentCompetition.session, rankings.filter((e) => !accounts.map((v) => v.taikoNo).includes(e.entryTaikoNo)));
+    console.log("Step 3 completed.");
 }

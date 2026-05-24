@@ -5,6 +5,7 @@ import glicko2 from 'glicko2-lite';
 export function updateRating(rankings: { entryTaikoNo: string, totalScore: number }[], ratings: RatingData[], accounts: Account[], days: number) {
     const map = new RatingDataMap(ratings.map(e => [e.taikoNo, e]));
 
+    // 정렬 후 대회 계정 제거
     rankings = rankings
         .toSorted((a, b) => {
             const aRating = map.get(a.entryTaikoNo);
@@ -12,12 +13,39 @@ export function updateRating(rankings: { entryTaikoNo: string, totalScore: numbe
 
             return bRating.rating - aRating.rating;
         })
-        .filter((e) => !accounts.map((v) => v.taikoNo).includes(e.entryTaikoNo));
+        .filter((e) => !accounts.map((v) => v.taikoNo).includes(e.entryTaikoNo))
+        .filter((e) => e.totalScore !== 0);
 
     const groupedRankings: { entryTaikoNo: string, totalScore: number }[][] = groupRanking(rankings);
+    const updatedRatingMap = update(groupedRankings, map);
 
+    scopeAndUpdateRD(ratings, updatedRatingMap, rankings.length, days)
+
+    const updatedRating = sortNewRating(updatedRatingMap);
+
+    return updatedRating;
+}
+
+function groupRanking(
+    rankings: { entryTaikoNo: string, totalScore: number }[]
+): { entryTaikoNo: string, totalScore: number }[][] {
+    const groups: { entryTaikoNo: string, totalScore: number }[][] = [];
+
+    while (1) {
+        if (rankings.length >= 1000) {
+            groups.push(rankings.slice(0, 1000));
+            rankings = rankings.slice(1000);
+        } else {
+            groups.push(rankings);
+            break;
+        }
+    }
+
+    return groups;
+}
+
+function update(groupedRankings: { entryTaikoNo: string, totalScore: number }[][], map: RatingDataMap) {
     const updatedRatingMap = new Map<string, RatingData>();
-
     groupedRankings.forEach((group) => {
         for (let i = 0; i < group.length; i++) {
             const matches: [number, number, number][] = [];
@@ -44,44 +72,43 @@ export function updateRating(rankings: { entryTaikoNo: string, totalScore: numbe
             });
         }
     });
+    return updatedRatingMap;
+}
 
+function scopeAndUpdateRD(ratings: RatingData[], updatedRatingMap: Map<string, RatingData>, participantCount: number, days: number) {
     ratings.forEach((r) => {
-        if (updatedRatingMap.has(r.taikoNo)) return;
-        const RD = Math.min(Math.sqrt(r.RD ** 2 + days * (r.Vol ** 2)), 350);
-        updatedRatingMap.set(r.taikoNo, {
-            taikoNo: r.taikoNo,
-            rating: r.ranking,
-            RD,
-            Vol: r.Vol,
-            ranking: 0
-        })
-    })
+        const newRating = updatedRatingMap.get(r.taikoNo);
+        if (newRating) {
+            // 변동폭 조정
+            updatedRatingMap.set(newRating.taikoNo, {
+                taikoNo: newRating.taikoNo,
+                rating: newRating.rating + (newRating.rating - r.rating) / participantCount,
+                RD: newRating.RD,
+                Vol: newRating.Vol,
+                ranking: 0
+            })
+        }
+        else {
+            // RD 감소 및 레이팅 감소
+            const RD = Math.min(Math.sqrt(r.RD ** 2 + days * (r.Vol ** 2)), 350);
+            updatedRatingMap.set(r.taikoNo, {
+                taikoNo: r.taikoNo,
+                rating: r.ranking - 10,
+                RD,
+                Vol: r.Vol,
+                ranking: 0
+            })
+        }
+    });
+}
 
+function sortNewRating(updatedRatingMap: Map<string, RatingData>) {
     const updatedRating = Array.from(updatedRatingMap.values());
     updatedRating.sort((a, b) => b.rating - a.rating)
     updatedRating.forEach((e, i) => {
         e.ranking = i + 1;
     });
-
     return updatedRating;
-}
-
-function groupRanking(
-    rankings: { entryTaikoNo: string, totalScore: number }[]
-): { entryTaikoNo: string, totalScore: number }[][] {
-    const groups: { entryTaikoNo: string, totalScore: number }[][] = [];
-
-    while (1) {
-        if (rankings.length >= 1000) {
-            groups.push(rankings.slice(0, 1000));
-            rankings = rankings.slice(1000);
-        } else {
-            groups.push(rankings);
-            break;
-        }
-    }
-
-    return groups;
 }
 
 class RatingDataMap {
