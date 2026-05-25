@@ -82,7 +82,7 @@ function scopeAndUpdateRD(ratings: RatingData[], updatedRatingMap: Map<string, R
             // 변동폭 조정
             updatedRatingMap.set(newRating.taikoNo, {
                 taikoNo: newRating.taikoNo,
-                rating: newRating.rating + (newRating.rating - r.rating) / participantCount,
+                rating: r.rating + (newRating.rating - r.rating) / participantCount,
                 RD: newRating.RD,
                 Vol: newRating.Vol,
                 ranking: 0
