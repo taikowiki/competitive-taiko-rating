@@ -1,0 +1,9 @@
+{{template "header.html" .}}
+
+<div class="error-container">
+    <h1 data-i18n="error_occurred">오류가 발생했습니다</h1>
+    <p class="error-msg">{{.error}}</p>
+    <a href="/" class="btn" data-i18n="back_to_home">홈으로 돌아가기</a>
+</div>
+
+{{template "footer.html" .}}

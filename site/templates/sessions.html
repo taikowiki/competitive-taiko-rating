@@ -1,0 +1,23 @@
+{{template "header.html" .}}
+
+<h1>S{{.season}} <span data-i18n="session_list">세션 목록</span></h1>
+<p data-i18n="select_session">기록을 확인할 세션을 선택해주세요.</p>
+
+<div class="grid">
+    {{range .sessions}}
+    <a href="/history/{{$.season}}/{{.}}" class="link-wrapper">
+        <div class="card link-card">
+            <h3>#{{.}}</h3>
+            <p data-i18n="view_scores">점수 확인하기</p>
+        </div>
+    </a>
+    {{else}}
+    <p data-i18n="no_recorded_session">기록된 세션이 없습니다.</p>
+    {{end}}
+</div>
+
+<div class="actions">
+    <a href="/history" class="btn secondary" data-i18n="back_to_season_list">시즌 목록으로</a>
+</div>
+
+{{template "footer.html" .}}

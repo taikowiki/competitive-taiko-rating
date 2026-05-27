@@ -1,0 +1,23 @@
+{{template "header.html" .}}
+
+<h1 data-i18n="past_season_ranking_list">역대 시즌 랭킹 목록</h1>
+<p data-i18n="select_season_for_ranking">랭킹을 확인할 시즌을 선택해주세요.</p>
+
+<div class="grid">
+    {{range .seasons}}
+    <a href="/ranking/season/{{.}}" class="link-wrapper">
+        <div class="card link-card">
+            <h3>S{{.}}</h3>
+            <p data-i18n="view_season_ranking">시즌 랭킹 보기</p>
+        </div>
+    </a>
+    {{else}}
+    <p data-i18n="no_recorded_season">기록된 시즌이 없습니다.</p>
+    {{end}}
+</div>
+
+<div class="actions">
+    <a href="/ranking" class="btn secondary" data-i18n="back_to_current_ranking">현재 랭킹으로</a>
+</div>
+
+{{template "footer.html" .}}
