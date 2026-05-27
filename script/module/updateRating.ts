@@ -32,6 +32,7 @@ function update(rankings: { entryTaikoNo: string, totalScore: number }[], map: R
     for (let i = 0; i < rankings.length; i++) {
         const matches = getMatches(i);
         const myRating = map.get(rankings[i].entryTaikoNo);
+        console.log(`index: ${i}, matches: ${matches.length}`)
         const updated = glicko2(myRating.rating, myRating.RD, myRating.Vol, matches);
         updatedRatingMap.set(rankings[i].entryTaikoNo, {
             taikoNo: rankings[i].entryTaikoNo,
@@ -58,7 +59,8 @@ function update(rankings: { entryTaikoNo: string, totalScore: number }[], map: R
     function getMatches(i: number) {
         if (rankings.length <= 21) {
             const matches: [number, number, number][] = [];
-            for (let j = 0; j < rankings.length && j !== i; j++) {
+            for (let j = 0; j < rankings.length; j++) {
+                if(j === i)continue;
                 const opponentRating = map.get(rankings[j].entryTaikoNo);
                 matches.push([
                     opponentRating.rating,
