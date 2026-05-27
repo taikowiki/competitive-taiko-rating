@@ -7,7 +7,7 @@ const rankings: {
     totalScore: number;
 }[] = [];
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 22; i++) {
     rankings.push({
         entryTaikoNo: `${i}`,
         totalScore: 100 - i

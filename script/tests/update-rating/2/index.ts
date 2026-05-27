@@ -1,6 +1,7 @@
 import path from "node:path";
 import { updateRating } from "../../../module/updateRating";
 import { RatingData } from "../../../module/types";
+import glicko2 from 'glicko2-lite';
 
 // 100명이서 시작시 변동 측정
 const rankings: {
