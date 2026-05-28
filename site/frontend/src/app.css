@@ -1,0 +1,91 @@
+:root {
+  --primary-color: #CF4844;
+  --secondary-color: #ff9900;
+  --bg-color: #ffffff;
+  --sidebar-bg: #f8f9fa;
+  --text-color: #333;
+  --border-color: #dee2e6;
+  --hover-color: #f1f3f5;
+  --font-family: 'Noto Sans KR', 'Noto Sans JP', sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Card Style */
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+/* Table Style */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+th, td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  background-color: var(--sidebar-bg);
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: var(--hover-color);
+}
+
+/* Button Style */
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #b03d3a;
+}
+
+/* Typography */
+h1, h2, h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+}
