@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"sync"
 
 	"c-rating-backend/db"
@@ -107,120 +106,11 @@ func NewServer(database *db.DB) *Server {
 func (s *Server) setupRoutes() {
 	v1 := s.engine.Group("/api/v1")
 	{
-		v1.GET("/competition/latest", s.getLatestCompetition)
-		v1.GET("/ranking/current", s.getCurrentRanking)
-		v1.GET("/ranking/season/:season", s.getSeasonRanking)
-		v1.GET("/history/seasons", s.getSeasons)
-		v1.GET("/history/seasons/:season/sessions", s.getSessionsBySeason)
-		v1.GET("/history/seasons/:season/sessions/:session/scores", s.getSessionScores)
-		v1.GET("/player/:taikoNo", s.getPlayerDetails)
+		v1.GET("/current/session", s.CurrentSession)
+		v1.GET("/current/compeid", s.CurrentHirobaCompeIds)
 	}
 }
 
 func (s *Server) Run(addr string) error {
 	return s.engine.Run(addr)
-}
-
-func (s *Server) getLatestCompetition(c *gin.Context) {
-	comp, err := s.db.GetLatestCompetition()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	if comp == nil {
-		c.JSON(http.StatusOK, gin.H{"competition": nil, "hirobaCompes": nil})
-		return
-	}
-
-	hirobaCompes, err := s.db.GetHirobaCompetitions(comp.Season, comp.Session)
-	if err != nil {
-		// Log error
-	}
-
-	if len(hirobaCompes) == 0 {
-		fallback, _, _, _ := s.db.GetLatestHirobaCompetitions()
-		hirobaCompes = fallback
-	}
-
-	diff1, _ := strconv.Atoi(comp.Diff1)
-	diff2, _ := strconv.Atoi(comp.Diff2)
-	diff3, _ := strconv.Atoi(comp.Diff3)
-
-	song1Title, song1Level := s.cache.GetSongInfo(comp.SongNo1, diff1)
-	song2Title, song2Level := s.cache.GetSongInfo(comp.SongNo2, diff2)
-	song3Title, song3Level := s.cache.GetSongInfo(comp.SongNo3, diff3)
-
-	c.JSON(http.StatusOK, gin.H{
-		"competition":  comp,
-		"song1":        song1Title,
-		"song1Level":   song1Level,
-		"song2":        song2Title,
-		"song2Level":   song2Level,
-		"song3":        song3Title,
-		"song3Level":   song3Level,
-		"hirobaCompes": hirobaCompes,
-	})
-}
-
-func (s *Server) getCurrentRanking(c *gin.Context) {
-	rankings, err := s.db.GetRankings()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, rankings)
-}
-
-func (s *Server) getSeasonRanking(c *gin.Context) {
-	season, _ := strconv.Atoi(c.Param("season"))
-	rankings, err := s.db.GetRankingsBySeason(season)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, rankings)
-}
-
-func (s *Server) getSeasons(c *gin.Context) {
-	seasons, err := s.db.GetSeasons()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, seasons)
-}
-
-func (s *Server) getSessionsBySeason(c *gin.Context) {
-	season, _ := strconv.Atoi(c.Param("season"))
-	sessions, err := s.db.GetSessionsBySeason(season)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, sessions)
-}
-
-func (s *Server) getSessionScores(c *gin.Context) {
-	season, _ := strconv.Atoi(c.Param("season"))
-	session, _ := strconv.Atoi(c.Param("session"))
-	scores, err := s.db.GetSessionScores(season, session)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, scores)
-}
-
-func (s *Server) getPlayerDetails(c *gin.Context) {
-	taikoNo := c.Param("taikoNo")
-	seasonRatings, err := s.db.GetPlayerSeasonRatings(taikoNo)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"taikoNo":       taikoNo,
-		"seasonRatings": seasonRatings,
-	})
 }

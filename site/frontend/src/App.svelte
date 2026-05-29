@@ -1,20 +1,26 @@
 <script lang="ts">
-  import { Router, type Route, navigation } from "svelte5-router-spa";
-  import { onMount } from "svelte";
+  import {
+    Router,
+    type Route,
+    navigation,
+    type RoutingFunction,
+  } from "svelte5-router-spa";
+  import { onMount, type Component } from "svelte";
   import Layout from "./components/layout/Layout.svelte";
-  
+
   // Routes
   import Index from "./routes/Index.svelte";
   import Ranking from "./routes/Ranking.svelte";
   import RankingSeasonList from "./routes/ranking/Season.svelte";
   import RankingSeasonDetail from "./routes/ranking/season/Season.svelte";
   import About from "./routes/About.svelte";
+  import type { models } from "./lib/i18n/models";
 
   const route: Route = {
     "/": async () => {
-      const res = await fetch("/api/v1/competition/latest");
-      const data = await res.json();
-      return { component: Index, props: data };
+      const session: models.Session = await fetch('/api/v1/current/session').then((e) => e.json())
+      const hirobaCompeIds = await fetch('/api/v1/current/compeid').then((e) => e.json())
+      return { component: Index, props: { session, hirobaCompeIds } };
     },
     "/ranking": async () => {
       const res = await fetch("/api/v1/ranking/current");

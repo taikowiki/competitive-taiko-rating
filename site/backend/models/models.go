@@ -1,18 +1,18 @@
 package models
 
-type Competition struct {
-	ID        int    `json:"id"`
-	Season    int    `json:"season"`
-	Session   int    `json:"session"`
-	SongNo1   string `json:"songNo1"`
-	SongNo2   string `json:"songNo2"`
-	SongNo3   string `json:"songNo3"`
-	Diff1     string `json:"diff1"`
-	Diff2     string `json:"diff2"`
-	Diff3     string `json:"diff3"`
-	StartDate string `json:"startDate"`
-	EndDate   string `json:"endDate"`
-	CheckDate string `json:"checkDate"`
+type Song struct {
+	SongNo string `json:"songNo"`
+	Title  string `json:"title"`
+	Level  int    `json:"level"`
+	Diff   string `json:"diff"`
+}
+
+type Session struct {
+	Season  int    `json:"season"`
+	Session int    `json:"session"`
+	Songs   []Song `json:"songs"`
+	Start   string `json:"start"`
+	End     string `json:"end"`
 }
 
 type Rating struct {
