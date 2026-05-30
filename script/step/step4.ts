@@ -4,6 +4,7 @@ import { Account } from "../module/getAccounts";
 import { CompeSong, openHirobaCompe } from "../module/hirobaCompe";
 import { DateTime } from "luxon";
 import { Setting } from "../module/types";
+import { getSongPool } from "../module/getSongPool";
 
 const createNewCompetition = defineDBHandler<[season: number, session: number, songs: [CompeSong, CompeSong, CompeSong], now: DateTime, days: number]>((season, session, songs, now, days) => {
     return async (run) => {
@@ -55,11 +56,8 @@ export async function step4(accounts: Account[], setting: Setting, currentSeason
 
         console.log(`Starting Season ${season} Session ${session}...`);
 
-        const songs: [CompeSong, CompeSong, CompeSong] = [
-            { songNo: "536", difficulty: 4 },
-            { songNo: "906", difficulty: 4 },
-            { songNo: "764", difficulty: 4 }
-        ]
+        const songPool = await getSongPool();
+        const songs = songPool.map((group) => group[Math.floor(Math.random() * group.length)]) as [CompeSong, CompeSong, CompeSong];
 
         console.log(`Creating competition record in database...`);
         await createNewCompetition(season, session, songs, now, setting.sessionDurationDays);
