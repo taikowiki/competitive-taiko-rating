@@ -187,3 +187,53 @@ func (s *Server) sessionsBySeason(c *gin.Context) {
 	}
 	c.JSON(200, sessions)
 }
+
+func (s *Server) playerDetail(c *gin.Context) {
+	taikoNo, ok := c.Params.Get("taikoNo")
+	if !ok {
+		c.Status(400)
+		return
+	}
+
+	rating, err := s.db.GetPlayerRating(taikoNo)
+	if err != nil {
+		c.Status(500)
+		return
+	}
+
+	log.Println(taikoNo, rating)
+
+	history, err := s.db.GetPlayerHistory(taikoNo)
+	if err != nil {
+		c.Status(500)
+		return
+	}
+
+	playerHistory := []PlayerRatingHistory{}
+	for _, h := range history {
+		playerHistory = append(playerHistory, PlayerRatingHistory{
+			Season:  h.Season,
+			Rating:  h.Rating,
+			Ranking: h.Ranking,
+		})
+	}
+
+	var currentRating float64
+	var currentRanking int
+	if rating != nil {
+		currentRating = rating.Rating
+		currentRanking = rating.Ranking
+	} else if len(playerHistory) > 0 {
+		// If not in current rating but has history, maybe show last known?
+		// Or just 0.
+	}
+
+	detail := PlayerDetail{
+		TaikoNo:        taikoNo,
+		CurrentRating:  currentRating,
+		CurrentRanking: currentRanking,
+		History:        playerHistory,
+	}
+
+	c.JSON(200, detail)
+}

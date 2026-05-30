@@ -1,6 +1,7 @@
 <script lang="ts">
     import { navigation } from "svelte5-router-spa";
     import type { models } from "../../lib/models";
+    import { getI18n } from "../../lib/i18n";
 
     interface Props {
         rankings: models.Rating[];
@@ -8,14 +9,15 @@
     }
 
     let { rankings, mode = "rating" }: Props = $props();
+    const t = getI18n();
 </script>
 
 <table>
     <thead>
         <tr>
-            <th>랭킹</th>
-            <th>북 번호</th>
-            <th>{mode === "rating" ? "레이팅" : "점수"}</th>
+            <th>{$t("ranking")}</th>
+            <th>{$t("taiko_no")}</th>
+            <th>{mode === "rating" ? $t("rating") : $t("score")}</th>
         </tr>
     </thead>
     <tbody>

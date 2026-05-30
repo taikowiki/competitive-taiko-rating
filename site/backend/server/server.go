@@ -113,6 +113,7 @@ func (s *Server) setupRoutes() {
 		v1.GET("/ranking/:season", s.seasonRanking)
 		v1.GET("/history", s.history)
 		v1.GET("/sessions", s.sessionsBySeason)
+		v1.GET("/player/:taikoNo", s.playerDetail)
 	}
 	s.engine.Static("/favicon.png", "./static/favicon.png")
 	s.engine.NoRoute(func(c *gin.Context) {

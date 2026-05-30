@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { models } from "../lib/models";
-    import { layout } from "../module/layout";
+    import { layout } from "../lib/layout";
+    import { getI18n } from "../lib/i18n/index";
 
     interface Props {
         session: models.Session | null;
@@ -10,6 +11,7 @@
     let { session, hirobaCompeIds }: Props = $props();
 
     const isMobile = layout.getIsMobile();
+    const t = getI18n();
 
     function getDiffColor(diff: '4' | '5') {
         if (diff === '4') return "#DB1885";
@@ -19,14 +21,14 @@
 </script>
 
 <h1>
-    태고의 달인 경쟁 레이팅
+    {$t("title")}
 </h1>
 {#if session}
     <div class="container">
         <h2>S{session.season} #{session.session}</h2>
-        <div class="period">기간: {session.start} - {session.end}</div>
+        <div class="period">{$t("period")}: {session.start} - {session.end}</div>
         <div class="song-container">
-            <div class="song-heading">과제곡</div>
+            <div class="song-heading">{$t("required_songs")}</div>
             {#each session.songs as song}
                 {@const color = getDiffColor(song.diff)}
                 <a
@@ -45,12 +47,12 @@
         </div>
     </div>
 {:else}
-    <div class="container">현재 진행중인 세션이 없습니다.</div>
+    <div class="container">{$t("no_active_session")}</div>
 {/if}
 
 {#if hirobaCompeIds.length}
     <div class="container">
-        <h2>동더히로바 대회 링크</h2>
+        <h2>{$t("hiroba_links")}</h2>
         <div class="link-container" class:is-mobile={$isMobile}>
             {#each hirobaCompeIds as compeId, i}
                 <a
@@ -58,7 +60,7 @@
                     href={`https://donderhiroba.jp/compe_detail.php?compeid=${compeId}`}
                     target="_blank"
                 >
-                    대회 {i + 1}
+                    {$t("competition")} {i + 1}
                 </a>
             {/each}
         </div>

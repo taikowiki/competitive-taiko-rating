@@ -1,42 +1,41 @@
 <script lang="ts">
-    import { t } from "../lib/i18n";
+    import { marked } from "marked";
+    import { getI18n } from "../lib/i18n";
+
+    const t = getI18n();
+    let htmlContent = $derived(marked.parse($t("about_content")) as string);
 </script>
 
-<div class="container">
-    <h1>{$t("about_title")}</h1>
-
-    <section>
-        <h2>{$t("about_intro_title")}</h2>
-        <p>{$t("about_intro_desc")}</p>
-    </section>
-
-    <section>
-        <h2>{$t("about_participation_title")}</h2>
-        <p>{$t("about_participation_desc")}</p>
-    </section>
-
-    <section>
-        <h2>{$t("about_logic_title")}</h2>
-        <p>{$t("about_logic_desc1")}</p>
-        <p>{$t("about_logic_desc2")}</p>
-    </section>
-
-    <section>
-        <h2>{$t("about_operation_title")}</h2>
-        <p>{$t("about_operation_desc")}</p>
-    </section>
+<div class="container about">
+    {@html htmlContent}
 </div>
 
 <style>
-    h1 {
-        margin-block: 10px;
-    }
-    h2 {
-        border-bottom: 2px solid var(--border-color);
-        padding-bottom: 0.5rem;
+    .about {
+        margin: 0 auto;
+        padding: 20px;
     }
 
-    section {
-        margin-bottom: 2rem;
+    :global(.about h1) {
+        margin-bottom: 30px;
+        color: var(--primary-color);
+    }
+
+    :global(.about h2) {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 10px;
+        color: #333;
+    }
+
+    :global(.about p) {
+        line-height: 1.6;
+        color: #555;
+    }
+
+    :global(.about a){
+        color: #CF4844;
     }
 </style>
+

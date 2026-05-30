@@ -30,4 +30,17 @@ export namespace models{
         taikoNo: string;
         score: number;
     }
+
+    export type PlayerRatingHistory = {
+        season: number;
+        rating: number;
+        ranking: number;
+    }
+
+    export type PlayerDetail = {
+        taikoNo: string;
+        currentRating: number;
+        currentRanking: number;
+        history: PlayerRatingHistory[];
+    }
 }

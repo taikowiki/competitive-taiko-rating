@@ -17,7 +17,8 @@
   import type { models } from "./lib/models";
   import History from "./routes/History.svelte";
   import Season from "./routes/history/season.svelte";
-    import Session from "./routes/history/[season]/session.svelte";
+  import Session from "./routes/history/[season]/session.svelte";
+  import Player from "./routes/Player.svelte";
 
   const route: Route = {
     "/": async () => {
@@ -81,6 +82,15 @@
       };
     },
     "/about": () => ({ component: About, props: {} }),
+    "/player/:taikoNo": async (params) => {
+      const player: models.PlayerDetail = await fetch(
+        `/api/v1/player/${params?.taikoNo}`,
+      ).then((res) => res.json());
+      return {
+        component: Player,
+        props: { player },
+      };
+    },
   };
 
   onMount(() => {

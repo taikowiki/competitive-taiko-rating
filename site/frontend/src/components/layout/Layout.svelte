@@ -1,8 +1,9 @@
-﻿<script lang="ts">
+<script lang="ts">
     import type { Snippet } from "svelte";
     import Header from "./Header.svelte";
-    import { layout } from "../../module/layout";
+    import { layout } from "../../lib/layout";
     import Footer from "./Footer.svelte";
+    import { useI18n } from "../../lib/i18n";
 
     interface Props {
         children?: Snippet;
@@ -12,6 +13,7 @@
 
     layout.useLang();
     layout.useIsMobile();
+    useI18n();
 </script>
 
 <Header />

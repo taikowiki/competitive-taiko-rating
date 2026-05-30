@@ -188,3 +188,34 @@ func (db *DB) GetCompeHistories(season int, session int) ([]CompeHistory, error)
 
 	return histories, nil
 }
+
+func (db *DB) GetPlayerRating(taikoNo string) (*Rating, error) {
+	row := db.QueryRow("SELECT taikoNo, rating, ranking, RD, Vol FROM `rating` WHERE `taikoNo` = ?", taikoNo)
+	var r Rating
+	err := row.Scan(&r.TaikoNo, &r.Rating, &r.Ranking, &r.RD, &r.Vol)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &r, nil
+}
+
+func (db *DB) GetPlayerHistory(taikoNo string) ([]SeasonRating, error) {
+	rows, err := db.Query("SELECT taikoNo, rating, ranking, season FROM `season_rating` WHERE `taikoNo` = ? ORDER BY `season` DESC", taikoNo)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var history []SeasonRating
+	for rows.Next() {
+		var sr SeasonRating
+		if err := rows.Scan(&sr.TaikoNo, &sr.Rating, &sr.Ranking, &sr.Season); err != nil {
+			continue
+		}
+		history = append(history, sr)
+	}
+	return history, nil
+}

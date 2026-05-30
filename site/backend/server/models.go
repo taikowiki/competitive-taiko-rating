@@ -14,3 +14,16 @@ type Session struct {
 	Start   string `json:"start"`
 	End     string `json:"end"`
 }
+
+type PlayerRatingHistory struct {
+	Season  int     `json:"season"`
+	Rating  float64 `json:"rating"`
+	Ranking int     `json:"ranking"`
+}
+
+type PlayerDetail struct {
+	TaikoNo       string                `json:"taikoNo"`
+	CurrentRating float64               `json:"currentRating"`
+	CurrentRanking int                  `json:"currentRanking"`
+	History       []PlayerRatingHistory `json:"history"`
+}

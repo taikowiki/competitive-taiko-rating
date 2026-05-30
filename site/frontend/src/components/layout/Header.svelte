@@ -1,12 +1,15 @@
 <script lang="ts">
     import { navigation } from "svelte5-router-spa";
     import logo from "../../assets/img/layout/logo.png";
-    import { layout } from "../../module/layout";
+    import { layout } from "../../lib/layout";
+    import { getI18n } from "../../lib/i18n";
 
     const lang = layout.getLang();
+    const isMobile = layout.getIsMobile();
+    const t = getI18n();
 </script>
 
-<header>
+<header class:is-mobile={$isMobile}>
     <div class="header-content">
         <div class="left">
             <img
@@ -17,9 +20,9 @@
                 role="presentation"
             />
             <nav>
-                <a href="/about">안내</a>
-                <a href="/ranking">랭킹</a>
-                <a href="/history">기록</a>
+                <a href="/about">{$t("about")}</a>
+                <a href="/ranking">{$t("ranking")}</a>
+                <a href="/history">{$t("history")}</a>
             </nav>
         </div>
         <div class="right">
@@ -41,6 +44,10 @@
         position: sticky;
         top: 0;
         z-index: 100;
+        padding-inline: calc((100% - 980px) / 2);
+        &.is-mobile{
+            padding-inline: 10px;
+        }
     }
 
     .header-content {
@@ -53,7 +60,7 @@
     .left {
         display: flex;
         align-items: center;
-        gap: 2rem;
+        column-gap: 10px;
     }
 
     .logo {
@@ -63,7 +70,7 @@
 
     nav {
         display: flex;
-        gap: 1.5rem;
+        gap: 10px;
     }
 
     nav a {
