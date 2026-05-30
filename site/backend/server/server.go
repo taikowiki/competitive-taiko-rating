@@ -106,9 +106,18 @@ func NewServer(database *db.DB) *Server {
 func (s *Server) setupRoutes() {
 	v1 := s.engine.Group("/api/v1")
 	{
-		v1.GET("/current/session", s.CurrentSession)
-		v1.GET("/current/compeid", s.CurrentHirobaCompeIds)
+		v1.GET("/current/session", s.currentSession)
+		v1.GET("/current/compeid", s.currentHirobaCompeIds)
+		v1.GET("/seasons", s.seasons)
+		v1.GET("/ranking", s.ranking)
+		v1.GET("/ranking/:season", s.seasonRanking)
+		v1.GET("/history", s.history)
+		v1.GET("/sessions", s.sessionsBySeason)
 	}
+	s.engine.Static("/favicon.png", "./static/favicon.png")
+	s.engine.NoRoute(func(c *gin.Context) {
+		c.File("./static/index.html")
+	})
 }
 
 func (s *Server) Run(addr string) error {

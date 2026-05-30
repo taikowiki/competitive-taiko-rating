@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { models } from "../lib/i18n/models";
+    import type { models } from "../lib/models";
     import { layout } from "../module/layout";
 
     interface Props {
@@ -30,7 +30,7 @@
             {#each session.songs as song}
                 {@const color = getDiffColor(song.diff)}
                 <a
-                    class="song"
+                    class="song linkbox"
                     href={`//taiko.wiki/song/${song.songNo}?diff=${song.diff === '4' ? "oni" : "ura"}`}
                     target="_blank"
                 >
@@ -54,7 +54,7 @@
         <div class="link-container" class:is-mobile={$isMobile}>
             {#each hirobaCompeIds as compeId, i}
                 <a
-                    class="link"
+                    class="linkbox"
                     href={`https://donderhiroba.jp/compe_detail.php?compeid=${compeId}`}
                     target="_blank"
                 >
@@ -66,8 +66,8 @@
 {/if}
 
 <style>
-    h2 {
-        margin: 0;
+    h1{
+        margin-block: 20px;
     }
     .container {
         margin-bottom: 20px;
@@ -107,10 +107,5 @@
         display: flex;
         flex-direction: column;
         row-gap: 7px;
-    }
-    .link {
-        background-color: #f1f2f3;
-        padding: 8px;
-        border-radius: 5px;
     }
 </style>

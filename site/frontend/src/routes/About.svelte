@@ -28,10 +28,12 @@
 </div>
 
 <style>
+    h1 {
+        margin-block: 10px;
+    }
     h2 {
         border-bottom: 2px solid var(--border-color);
         padding-bottom: 0.5rem;
-        margin: 0;
     }
 
     section {

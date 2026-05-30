@@ -1,6 +1,6 @@
 package db
 
-type Competition struct {
+type Session struct {
 	ID        int    `json:"id"`
 	Season    int    `json:"season"`
 	Session   int    `json:"session"`
@@ -19,4 +19,32 @@ type HirobaCompetition struct {
 	CompeID string `json:"compeId"`
 	Season  int    `json:"season"`
 	Session int    `json:"session"`
+}
+
+type Season struct {
+	Season    int    `json:"season"`
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
+}
+
+type Rating struct {
+	TaikoNo string  `json:"taikoNo"`
+	Rating  float64 `json:"rating"`
+	Ranking int     `json:"ranking"`
+	RD      float64 `json:"RD"`
+	Vol     float64 `json:"Vol"`
+}
+
+type SeasonRating struct {
+	TaikoNo string  `json:"taikoNo"`
+	Rating  float64 `json:"rating"`
+	Ranking int     `json:"ranking"`
+	Season  int     `json:"season"`
+}
+
+type CompeHistory struct {
+	Season  int    `json:"season"`
+	Session int    `json:"session"`
+	TaikoNo string `json:"taikoNo"`
+	Score   int    `json:"score"`
 }

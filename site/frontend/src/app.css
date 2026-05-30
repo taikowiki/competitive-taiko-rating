@@ -38,3 +38,27 @@ a {
   flex-direction: column;
   row-gap: 10px;
 }
+
+.linkbox {
+  background-color: #f1f2f3;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.linkbtn {
+  display: block;
+  background-color: #CF4844;
+  border-radius: 5px;
+  padding: 8px;
+  color: white;
+  width:fit-content
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
