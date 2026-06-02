@@ -19,6 +19,7 @@
   import Season from "./routes/history/season.svelte";
   import Session from "./routes/history/[season]/session.svelte";
   import Player from "./routes/Player.svelte";
+    import Loading from "./components/Loading.svelte";
 
   const route: Route = {
     "/": async () => {
@@ -99,5 +100,5 @@
 </script>
 
 <Layout>
-  <Router {route} />
+  <Router {route} loadingComponent={Loading}/>
 </Layout>
