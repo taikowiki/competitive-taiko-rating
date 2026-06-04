@@ -50,10 +50,8 @@ export async function step3(accounts: Account[], setting: Setting, rankings: Ran
         return;
     }
     const ratings = await getRatings();
-    console.log(ratings);
     console.log(`Calculating updated ratings for ${rankings.length} ranking entries...`);
     const newRatings = updateRating(rankings, ratings, accounts, setting.sessionDurationDays);
-    console.log(newRatings);
 
     console.log(`Saving ${newRatings.length} updated ratings to database...`);
     await updateRatingDB(newRatings);
