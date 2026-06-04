@@ -42,6 +42,7 @@ function update(rankings: { entryTaikoNo: string, totalScore: number }[], map: R
             ranking: 0
         });
     }
+    return updatedRatingMap;
 
     function getGlickoScore(myTotalScore: number, opponentRatingScore: number) {
         /*
@@ -118,7 +119,6 @@ function update(rankings: { entryTaikoNo: string, totalScore: number }[], map: R
         return [...upperMatches, ...lowerMatches];
     }
 
-    return updatedRatingMap;
 }
 
 function scopeNewRating(oldRatings: RatingDataMap, newRatings: Map<string, RatingData>, participantCount: number) {
@@ -134,7 +134,7 @@ function decreaseUnparticipatedRD(oldRatings: RatingData[], newRatingMap: Map<st
         const RD = Math.min(Math.sqrt(r.RD ** 2 + 1 * (r.Vol ** 2)), 350);
         newRatingMap.set(r.taikoNo, {
             taikoNo: r.taikoNo,
-            rating: r.ranking - 10,
+            rating: r.rating - 10,
             RD,
             Vol: r.Vol,
             ranking: 0
