@@ -5,6 +5,9 @@ import { CompeSong, openHirobaCompe } from "../module/hirobaCompe";
 import { DateTime } from "luxon";
 import { Setting } from "../module/types";
 import { getSongPool } from "../module/getSongPool";
+import { getWebhooks } from "../module/getWebhooks";
+import { webhookEn, webhookJa, webhookKo } from "../module/webhookMessage";
+import TaikowikiApi from "@taiko-wiki/taikowiki-api";
 
 const createNewCompetition = defineDBHandler<[season: number, session: number, songs: [CompeSong, CompeSong, CompeSong], now: DateTime, days: number]>((season, session, songs, now, days) => {
     return async (run) => {
@@ -40,7 +43,58 @@ const insertHirobaCompetition = defineDBHandler<[season: number, session: number
             }))
             .execute(run);
     }
-})
+});
+
+export async function sendWebhook(season: number, session: number, songs: CompeSong[]) {
+    function getDiff(diff: 1 | 2 | 3 | 4 | 5){
+        if(diff === 1){
+            return 'easy'
+        } else if(diff === 2){
+            return 'normal'
+        } else if (diff === 3){
+            return 'hard'
+        } else if (diff === 4){
+            return 'oni'
+        } else {
+            return 'ura'
+        }
+    }
+
+    const wiki = new TaikowikiApi()
+    const songs_ = await Promise.all(
+        songs.map(async (s) => {
+            const songData = await wiki.song(s.songNo)
+            return {
+                title: songData.title,
+                diff: s.difficulty,
+                level: songData.courses[getDiff(s.difficulty)]?.level ?? 0
+            }
+        })
+    )
+
+
+    const webhookUrl = await getWebhooks();
+    for (const key in webhookUrl) {
+        let content: string = '';
+        if (key === "ko") {
+            content = webhookKo(season, session, songs_)
+        } else if (key === "en") {
+            content = webhookEn(season, session, songs_)
+        } else if (key === "ja") {
+            content = webhookJa(season, session, songs_)
+        }
+
+        await fetch(webhookUrl[key as 'ko' | 'ja' | 'en'] as string, {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                content
+            })
+        })
+    }
+}
 
 export async function step4(accounts: Account[], setting: Setting, currentSeason: DBSchema['season'], currentCompetition: DBSchema['competition'] | null, now: DateTime, needToCheck: boolean) {
     console.log("Step 4: Creating new competition and Hiroba competitions...");
@@ -77,6 +131,8 @@ export async function step4(accounts: Account[], setting: Setting, currentSeason
                 console.error(`Failed to create Hiroba Competition for account ${account.taikoNo}`, err);
             }
         }
+
+        await sendWebhook(season, session, songs);
     } else {
         console.log("Competition check not required yet. Skipping new competition creation.");
     }

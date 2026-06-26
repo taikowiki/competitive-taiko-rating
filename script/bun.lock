@@ -3,6 +3,7 @@
   "workspaces": {
     "": {
       "dependencies": {
+        "@taiko-wiki/taikowiki-api": "^1.1.2",
         "@types/bun": "^1.3.14",
         "@yowza/db-handler": "^1.1.3",
         "glicko2-lite": "^5.0.0",
@@ -74,6 +75,8 @@
     "@jimp/types": ["@jimp/types@1.6.1", "", { "dependencies": { "zod": "^3.23.8" } }, "sha512-leI7YbveTNi565m910XgIOwXyuu074H5qazAD1357HImJSv2hqxnWXpwxQbadGWZ7goZRYBDZy5lpqud0p7q5w=="],
 
     "@jimp/utils": ["@jimp/utils@1.6.1", "", { "dependencies": { "@jimp/types": "1.6.1", "tinycolor2": "^1.6.0" } }, "sha512-veFPRd93FCnS7AgmCkPgARVGoDRrJ9cm1ujuNyA+UfQ5VKbED2002sm5XfFLFwTsKC8j04heTrwe+tU1dluXOw=="],
+
+    "@taiko-wiki/taikowiki-api": ["@taiko-wiki/taikowiki-api@1.1.2", "", {}, "sha512-UstDjyLHAeZyWKxSFuyUkCL3G3857FFwIgo0hOQ32Y9R6K6t8RbTR/6SvAatjBWFTkxEdrDKbUA1K2HrTHvJIA=="],
 
     "@tokenizer/inflate": ["@tokenizer/inflate@0.4.1", "", { "dependencies": { "debug": "^4.4.3", "token-types": "^6.1.1" } }, "sha512-2mAv+8pkG6GIZiF1kNg1jAjh27IDxEPKwdGul3snfztFerfPGI1LjDezZp3i7BElXompqEtPmoPx6c2wgtWsOA=="],
 
