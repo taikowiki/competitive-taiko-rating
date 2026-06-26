@@ -1,7 +1,7 @@
 <footer>
     <div>©hotsixman. Not affiliated with BANDAI NAMCO Entertainment Inc.</div>
     <div>
-        <a href="https://discord.gg/HdSX7redAJ">Discord</a>
+        <a href="https://discord.gg/kyMZzm88sf">Discord</a>
         <a href="https://github.com/taikowiki/competitive-taiko-rating">Github</a>
     </div>
 </footer>

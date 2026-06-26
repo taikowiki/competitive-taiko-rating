@@ -1,6 +1,8 @@
 <script lang="ts">
     import { navigation } from "svelte5-router-spa";
     import logo from "../../assets/img/layout/logo.png";
+    import discord from "../../assets/img/discord.svg";
+    import github from '../../assets/img/github.svg';
     import { layout } from "../../lib/layout";
     import { getI18n } from "../../lib/i18n";
 
@@ -31,6 +33,9 @@
                 <option value="ja">JP</option>
                 <option value="en">EN</option>
             </select>
+            <a class="link-img-wrapper" href="https://discord.gg/kyMZzm88sf" target="_blank">
+                <img class="link" src={discord} alt="discord">
+            </a>
         </div>
     </div>
 </header>
@@ -57,7 +62,7 @@
         height: 100%;
     }
 
-    .left {
+    .left, .right {
         display: flex;
         align-items: center;
         column-gap: 10px;
@@ -94,5 +99,14 @@
 
     select option {
         color: #333;
+    }
+
+    .link-img-wrapper{
+        display:flex;
+    }
+
+    .link{
+        width: 30px;
+        height: 30px;
     }
 </style>
